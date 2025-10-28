@@ -11,7 +11,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func Generate() {
+func Generate(reportName, reportPath string) {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -41,8 +41,20 @@ func Generate() {
 
 	day := time.Now().Day()
 	monthAndYear := strings.Replace(dateWorked, "/", "_", 1)
-	reportName := fmt.Sprintf("report_%d_%s.html", day, monthAndYear)
-	reportPath := fmt.Sprintf("reports/%s", reportName)
+	if reportName == "" {
+		reportName = fmt.Sprintf("report_%d_%s.html", day, monthAndYear)
+	} else {
+		reportName = fmt.Sprintf(
+			"%s_%d_%s.html", reportName, day, monthAndYear,
+		)
+	}
+
+	if reportPath == "" {
+		reportPath = fmt.Sprintf("reports/%s", reportName)
+	} else {
+		reportPath = fmt.Sprintf("%s/%s", reportPath, reportName)
+	}
+
 	report, err := os.Create(reportPath)
 	templatePath := "template.html"
 	err = generateHTML(report, reportData, templatePath)
