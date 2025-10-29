@@ -1,3 +1,5 @@
-USERNAME="your-email"
-API_KEY="your-api-key"
-URL="jira-url"
+EMAIL="your-email"
+URL="https://your-domain.atlassian.net"
+COMPANY_NAME="Govone"
+CNPJ=""
+USERNAME=""
