@@ -28,6 +28,7 @@ Se você quer apenas usar a ferramenta sem precisar instalar o Go, siga os passo
 1.  Descompacte o arquivo `.zip` em uma pasta de sua preferência.
 2.  Dentro da pasta, renomeie o arquivo `env-example` para `.env`.
 3.  Abra o arquivo `.env` com um editor de texto e preencha com suas credenciais do Jira.
+4. use esse [link](https://id.atlassian.com/manage-profile/security/api-tokens) para emitir o seu token no jira
 
 ### 3. Execute o Relatório
 
