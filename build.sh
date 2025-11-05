@@ -9,14 +9,11 @@ mkdir -p releases
 # Define o nome base do executável
 BINARY_NAME="jira-reporter"
 
-# Arquivos essenciais que precisam ir junto com o binário
-FILES_TO_PACKAGE="template.html env-example"
-
 # ----- Build para Windows (amd64) -----
 echo "Building for Windows amd64..."
 GOOS=windows GOARCH=amd64 go build -o "./releases/${BINARY_NAME}.exe" .
 cd releases
-zip -q "${BINARY_NAME}-windows-amd64.zip" "${BINARY_NAME}.exe" ${FILES_TO_PACKAGE}
+zip -q "${BINARY_NAME}-windows-amd64.zip" "${BINARY_NAME}.exe" ../template.html ../env-example
 rm "${BINARY_NAME}.exe"
 cd ..
 echo "Windows build packaged."
@@ -25,7 +22,7 @@ echo "Windows build packaged."
 echo "Building for Linux amd64..."
 GOOS=linux GOARCH=amd64 go build -o "./releases/${BINARY_NAME}-linux-amd64" .
 cd releases
-zip -q "${BINARY_NAME}-linux-amd64.zip" "${BINARY_NAME}-linux-amd64" ${FILES_TO_PACKAGE}
+zip -q "${BINARY_NAME}-linux-amd64.zip" "${BINARY_NAME}-linux-amd64" ../template.html ../env-example
 rm "${BINARY_NAME}-linux-amd64"
 cd ..
 echo "Linux build packaged."
@@ -34,7 +31,7 @@ echo "Linux build packaged."
 echo "Building for macOS amd64 (Intel)..."
 GOOS=darwin GOARCH=amd64 go build -o "./releases/${BINARY_NAME}-macos-amd64" .
 cd releases
-zip -q "${BINARY_NAME}-macos-amd64.zip" "${BINARY_NAME}-macos-amd64" ${FILES_TO_PACKAGE}
+zip -q "${BINARY_NAME}-macos-amd64.zip" "${BINARY_NAME}-macos-amd64" ../template.html ../env-example
 rm "${BINARY_NAME}-macos-amd64"
 cd ..
 echo "macOS (Intel) build packaged."
@@ -43,7 +40,7 @@ echo "macOS (Intel) build packaged."
 echo "Building for macOS arm64 (Apple Silicon)..."
 GOOS=darwin GOARCH=arm64 go build -o "./releases/${BINARY_NAME}-macos-arm64" .
 cd releases
-zip -q "${BINARY_NAME}-macos-arm64.zip" "${BINARY_NAME}-macos-arm64" ${FILES_TO_PACKAGE}
+zip -q "${BINARY_NAME}-macos-arm64.zip" "${BINARY_NAME}-macos-arm64" ../template.html ../env-example
 rm "${BINARY_NAME}-macos-arm64"
 cd ..
 echo "macOS (Apple Silicon) build packaged."
