@@ -1,6 +1,6 @@
 EMAIL="your-email"
 API_KEY="your-api-key"
 URL="https://your-domain.atlassian.net"
-COMPANY_NAME="Govone"
+COMPANY_NAME="your-company-name"
 CNPJ=""
 USERNAME=""
