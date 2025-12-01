@@ -31,8 +31,9 @@ func Generate(reportName, reportPath string) {
 	}
 
 	now := time.Now()
+	previousMonth := now.AddDate(0, -1, 0)
 	layout := "01/2006"
-	dateWorked := now.Format(layout)
+	dateWorked := previousMonth.Format(layout)
 	reportData := ReportData{
 		User:       *userData,
 		Jira:       *jiraData,
