@@ -57,6 +57,11 @@ func Generate(reportName, reportPath string) {
 	}
 
 	report, err := os.Create(reportPath)
+	if err != nil {
+		log.Fatalf("Error to create report file: %v", err)
+		return
+	}
+
 	templatePath := "template.html"
 	err = generateHTML(report, reportData, templatePath)
 	if err != nil {
