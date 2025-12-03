@@ -24,6 +24,10 @@
 # Go workspace file
 go.work
 
+# Other files and directories to ignore
+releases/
+reports/
+
 # End of https://www.toptal.com/developers/gitignore/api/go
 
 # Generated using ignr.py - github.com/Antrikshy/ignr.py
