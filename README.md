@@ -1,15 +1,50 @@
 # Jira Reporter
 
-Este projeto é uma aplicação Go projetada para gerar um relatório de serviço mensal com base em tarefas do Jira. Ele busca issues do Jira do mês anterior que foram atribuídas ao usuário atual e então processa esses dados para gerar um relatório.
+[![Go Version](https://img.shields.io/badge/Go-1.24+-00ADD8?style=flat&logo=go)](https://go.dev/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-## Tecnologias Utilizadas
+Aplicação CLI em Go para gerar relatórios mensais de prestação de serviços com base em tarefas do Jira. Busca automaticamente issues do mês anterior atribuídas ao usuário e gera relatórios em **HTML** ou **DOCX**.
 
-* **Go**: A linguagem de programação principal para a lógica da aplicação.
-* **go-atlassian/v2**: Uma biblioteca Go usada para interagir com a API do Jira.
-* **godotenv**: Uma biblioteca Go para gerenciar variáveis de ambiente.
-* **Template HTML**: Usado para gerar a saída final do relatório.
+## ✨ Funcionalidades
 
-## Como Baixar e Usar (Para Usuários)
+- 📊 Geração automática de relatórios mensais
+- 📄 Suporte a múltiplos formatos: **HTML** e **DOCX**
+- 🔗 Integração com Jira Cloud via API
+- 📋 Template HTML personalizável
+- ⚡ CLI simples e intuitiva
+
+## 🏗️ Arquitetura
+
+O projeto segue a arquitetura **MVC**
+
+```
+internal/
+├── config/          # Configuração centralizada (Singleton)
+├── model/           # Entidades de domínio (Issue, User, Report)
+├── repository/      # Acesso a dados externos (Jira API)
+├── service/         # Lógica de negócio e orquestração
+└── view/            # Geradores de saída (HTML, DOCX)
+```
+
+| Camada         | Responsabilidade                                       |
+| -------------- | ------------------------------------------------------ |
+| **Config**     | Carregamento centralizado de variáveis de ambiente     |
+| **Model**      | Estruturas de dados puras sem dependências externas    |
+| **Repository** | Interface `JiraRepository` para acesso ao Jira (DIP)   |
+| **Service**    | Orquestração da geração de relatórios                  |
+| **View**       | Interface `ReportGenerator` para extensibilidade (OCP) |
+
+## 🛠️ Tecnologias
+
+| Tecnologia          | Descrição                              |
+| ------------------- | -------------------------------------- |
+| **Go 1.24+**        | Linguagem principal                    |
+| **go-atlassian/v2** | Cliente para API do Jira               |
+| **Cobra**           | Framework CLI                          |
+| **godotenv**        | Gerenciamento de variáveis de ambiente |
+| **LibreOffice**     | Conversão HTML → DOCX (opcional)       |
+
+## 📥 Como Baixar e Usar (Para Usuários)
 
 Se você quer apenas usar a ferramenta sem precisar instalar o Go, siga os passos abaixo.
 
@@ -18,26 +53,27 @@ Se você quer apenas usar a ferramenta sem precisar instalar o Go, siga os passo
 1.  Vá para a [página de Releases](https://github.com/Alan-Gomes1/jira-reporter/releases) do projeto.
 2.  Encontre a versão mais recente.
 3.  Na seção **Assets**, baixe o arquivo `.zip` correspondente ao seu sistema operacional:
-    * **Windows (64-bit):** `jira-reporter-windows-amd64.zip`
-    * **Linux (64-bit):** `jira-reporter-linux-amd64.zip`
-    * **macOS (Intel):** `jira-reporter-macos-amd64.zip`
-    * **macOS (Apple Silicon M1/M2/M3):** `jira-reporter-macos-arm64.zip`
+    - **Windows (64-bit):** `jira-reporter-windows-amd64.zip`
+    - **Linux (64-bit):** `jira-reporter-linux-amd64.zip`
+    - **macOS (Intel):** `jira-reporter-macos-amd64.zip`
+    - **macOS (Apple Silicon M1/M2/M3):** `jira-reporter-macos-arm64.zip`
 
 ### 2. Extraia e Configure
 
 1.  Descompacte o arquivo `.zip` em uma pasta de sua preferência.
 2.  Dentro da pasta, renomeie o arquivo `env-example` para `.env`.
-3.  Abra o arquivo `.env` com um editor de texto e preencha com suas credenciais do Jira.
-4. use esse [link](https://id.atlassian.com/manage-profile/security/api-tokens) para emitir o seu token no jira
+3.  Abra o arquivo `.env` com um editor de texto e preencha com suas credenciais.
+4.  Use esse [link](https://id.atlassian.com/manage-profile/security/api-tokens) para gerar seu token de API no Jira.
 
 ### 3. Execute o Relatório
 
 Abra seu terminal (CMD ou PowerShell no Windows) na pasta onde você extraiu os arquivos e execute o comando correspondente:
 
 #### **No Windows**
+
 ```powershell
 .\jira-reporter.exe
-````
+```
 
 #### **No Linux ou macOS**
 
@@ -63,15 +99,16 @@ Depois, execute o programa:
 
 O relatório será gerado na subpasta `reports/`.
 
------
+---
 
-## Primeiros Passos (Para Desenvolvedores)
+## 🚀 Primeiros Passos (Para Desenvolvedores)
 
 Siga estas instruções para configurar e executar o Jira Reporter a partir do código-fonte.
 
 ### Pré-requisitos
 
-  * Go (versão 1.16 ou superior recomendada)
+- Go 1.24 ou superior
+- LibreOffice (apenas para geração de DOCX)
 
 ### Instalação e Configuração
 
@@ -90,7 +127,19 @@ Siga estas instruções para configurar e executar o Jira Reporter a partir do c
     cp env-example .env
     ```
 
-    Edite o arquivo `.env` e forneça os valores necessários para sua instância Jira.
+    Edite o arquivo `.env` com suas credenciais:
+
+    ```env
+    # Credenciais Jira
+    EMAIL="seu-email@exemplo.com"
+    API_KEY="seu-token-api-jira"
+    URL="https://seu-dominio.atlassian.net"
+
+    # Dados do Relatório
+    COMPANY_NAME="Nome da Empresa"
+    CNPJ="00.000.000/0001-00"
+    USER_NAME="Seu Nome Completo"
+    ```
 
 3.  **Instale as Dependências:**
 
@@ -100,15 +149,78 @@ Siga estas instruções para configurar e executar o Jira Reporter a partir do c
 
 ### Executando a Aplicação
 
-Para executar a aplicação e gerar um relatório, execute o seguinte comando a partir da raiz do projeto:
+Para executar a aplicação e gerar um relatório:
 
 ```bash
+# Gerar relatório HTML (padrão)
 go run main.go
+
+# Ou compile primeiro
+go build -o jira-reporter .
+./jira-reporter
 ```
 
-Isso buscará as issues do Jira e gerará um relatório HTML no diretório `reports/`.
+### 📋 Opções de Linha de Comando
 
-## Automatizando com Cron
+```bash
+# Ver ajuda
+./jira-reporter --help
+
+# Especificar nome do relatório
+./jira-reporter -n "meu-relatorio"
+
+# Especificar caminho de saída
+./jira-reporter -p "/caminho/para/saida"
+
+# Gerar em formato DOCX (requer LibreOffice)
+./jira-reporter -f docx
+
+# Combinando opções
+./jira-reporter -n "relatorio-novembro" -p "./relatorios" -f docx
+```
+
+| Flag           | Descrição                  | Padrão     |
+| -------------- | -------------------------- | ---------- |
+| `-n, --name`   | Nome do relatório          | `report`   |
+| `-p, --path`   | Diretório de saída         | `reports/` |
+| `-f, --format` | Formato (`html` ou `docx`) | `html`     |
+
+### 🔧 Build para Produção
+
+```bash
+# Build simples
+go build -o jira-reporter .
+
+# Build otimizado (menor tamanho)
+go build -ldflags="-s -w" -o jira-reporter .
+
+# Build para diferentes plataformas
+GOOS=windows GOARCH=amd64 go build -o jira-reporter-windows-amd64.exe .
+GOOS=linux GOARCH=amd64 go build -o jira-reporter-linux-amd64 .
+GOOS=darwin GOARCH=amd64 go build -o jira-reporter-macos-amd64 .
+GOOS=darwin GOARCH=arm64 go build -o jira-reporter-macos-arm64 .
+```
+
+### 📝 Personalizando o Template
+
+O arquivo `template.html` na raiz do projeto pode ser editado para personalizar a aparência do relatório. As variáveis disponíveis são:
+
+| Variável                        | Descrição                     |
+| ------------------------------- | ----------------------------- |
+| `{{.User.CompanyName}}`         | Nome da empresa               |
+| `{{.User.CNPJ}}`                | CNPJ da empresa               |
+| `{{.User.Username}}`            | Nome do usuário               |
+| `{{.DateWorked}}`               | Mês/Ano de competência        |
+| `{{.Jira.Items}}`               | Lista de issues               |
+| `{{.Jira.Items[].Key}}`         | Chave da issue (ex: PROJ-123) |
+| `{{.Jira.Items[].Summary}}`     | Resumo da issue               |
+| `{{.Jira.Items[].Description}}` | Descrição da issue            |
+| `{{.Jira.Items[].Date}}`        | Data da issue                 |
+| `{{.Jira.Items[].URL}}`         | URL da issue no Jira          |
+
+---
+
+## ⏰ Automatizando com Cron
 
 Você pode automatizar a geração do seu relatório Jira mensal usando `cron`.
 
@@ -121,8 +233,29 @@ Você pode automatizar a geração do seu relatório Jira mensal usando `cron`.
 2.  **Adicione a seguinte linha ao seu crontab (usando o executável compilado):**
 
     ```cron
-    0 10 1 * * cd /caminho/completo/para/seu/projeto/jira-reporter && ./jira-reporter-linux-amd64 >> /caminho/completo/para/seu/projeto/jira-reporter.log 2>&1
+    0 10 1 * * cd /caminho/completo/para/seu/projeto/jira-reporter && ./jira-reporter >> ./jira-reporter.log 2>&1
     ```
-3. Salve e saia do seu editor crontab (geralmente pressionando Ctrl+X, depois S, depois Enter).
+
+3.  Salve e saia do seu editor crontab (geralmente pressionando Ctrl+X, depois S, depois Enter).
 
 Seu relatório Jira será gerado automaticamente às 10h da manhã no primeiro dia de cada mês!
+
+---
+
+## 🤝 Contribuindo
+
+Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou pull requests.
+
+1. Faça um fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
+3. Commit suas mudanças (`git commit -m 'Adiciona nova feature'`)
+4. Push para a branch (`git push origin feature/nova-feature`)
+5. Abra um Pull Request
+
+## 📄 Licença
+
+Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+## 👤 Autor
+
+**Alan Gomes** - [GitHub](https://github.com/Alan-Gomes1)
