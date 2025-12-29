@@ -46,6 +46,7 @@ type ReportOptions struct {
 	Name   string
 	Path   string
 	Format ReportFormat
+	Date   string // Mês/ano no formato MM/YYYY (opcional, padrão: mês anterior)
 }
 
 // NewReportOptions cria opções com valores padrão.
@@ -54,5 +55,6 @@ func NewReportOptions() *ReportOptions {
 		Name:   "",
 		Path:   "reports",
 		Format: FormatHTML,
+		Date:   "", // Vazio significa mês anterior
 	}
 }

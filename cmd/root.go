@@ -31,6 +31,7 @@ func runReport(cmd *cobra.Command, args []string) {
 	reportName, _ := cmd.Flags().GetString("name")
 	reportPath, _ := cmd.Flags().GetString("path")
 	reportFormat, _ := cmd.Flags().GetString("format")
+	reportDate, _ := cmd.Flags().GetString("date")
 
 	// Carrega as configurações
 	cfg, err := config.Load()
@@ -49,6 +50,7 @@ func runReport(cmd *cobra.Command, args []string) {
 		Name:   reportName,
 		Path:   reportPath,
 		Format: model.ReportFormat(reportFormat),
+		Date:   reportDate,
 	}
 
 	// Gera o relatório
@@ -95,5 +97,10 @@ func init() {
 	)
 	rootCmd.Flags().StringP(
 		"format", "f", "html", "Formato do relatório (html ou docx)",
+	)
+	rootCmd.Flags().StringP(
+		"date", "d", "",
+		"Mês/ano do relatório no formato MM/YYYY (ex: 01/2025). "+
+			"Padrão: mês anterior",
 	)
 }

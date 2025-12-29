@@ -51,7 +51,7 @@ func (s *reportService) Generate(opts model.ReportOptions) error {
 	}
 
 	// Buscar dados do Jira
-	reportData, err := s.fetchReportData()
+	reportData, err := s.fetchReportData(opts.Date)
 	if err != nil {
 		return err
 	}
@@ -90,8 +90,21 @@ func (s *reportService) validateFormat(format model.ReportFormat) error {
 }
 
 // fetchReportData busca e monta os dados do relatório.
-func (s *reportService) fetchReportData() (*model.ReportData, error) {
-	firstDay, lastDay := s.dateService.GetPreviousMonthRange()
+func (s *reportService) fetchReportData(
+	specifiedDate string,
+) (*model.ReportData, error) {
+	var firstDay, lastDay time.Time
+
+	// Usa a data especificada ou o mês anterior como padrão
+	if specifiedDate != "" {
+		month, year, err := s.dateService.ParseMonthYear(specifiedDate)
+		if err != nil {
+			return nil, err
+		}
+		firstDay, lastDay = s.dateService.GetMonthRange(month, year)
+	} else {
+		firstDay, lastDay = s.dateService.GetPreviousMonthRange()
+	}
 
 	issues, err := s.repo.FetchIssues(firstDay, lastDay)
 	if err != nil {
@@ -141,11 +154,18 @@ func (s *reportService) resolvePaths(
 // generateFileName gera o nome do arquivo baseado nas opções.
 func (s *reportService) generateFileName(opts model.ReportOptions) string {
 	now := time.Now()
-	previousMonth := now.AddDate(0, -1, 0)
-	dateWorked := previousMonth.Format("01/2006")
-	monthAndYear := strings.Replace(dateWorked, "/", "_", 1)
 	day := now.Day()
 	ext := opts.Format.Extension()
+
+	// Determina o mês/ano para o nome do arquivo
+	var monthAndYear string
+	if opts.Date != "" {
+		monthAndYear = strings.Replace(opts.Date, "/", "_", 1)
+	} else {
+		// Usa o mês anterior como padrão
+		previousMonth := now.AddDate(0, -1, 0)
+		monthAndYear = previousMonth.Format("01_2006")
+	}
 
 	if opts.Name == "" {
 		return fmt.Sprintf("report_%d_%s.%s", day, monthAndYear, ext)

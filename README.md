@@ -175,15 +175,22 @@ go build -o jira-reporter .
 # Gerar em formato DOCX (requer LibreOffice)
 ./jira-reporter -f docx
 
+# Especificar mês/ano do relatório (formato MM/YYYY)
+./jira-reporter -d "01/2025"
+
+# Gerar relatório de outubro/2024 em DOCX
+./jira-reporter -d "10/2024" -f docx
+
 # Combinando opções
-./jira-reporter -n "relatorio-novembro" -p "./relatorios" -f docx
+./jira-reporter -n "relatorio-dezembro" -p "./relatorios" -f docx -d "12/2025"
 ```
 
-| Flag           | Descrição                  | Padrão     |
-| -------------- | -------------------------- | ---------- |
-| `-n, --name`   | Nome do relatório          | `report`   |
-| `-p, --path`   | Diretório de saída         | `reports/` |
-| `-f, --format` | Formato (`html` ou `docx`) | `html`     |
+| Flag           | Descrição                              | Padrão       |
+| -------------- | -------------------------------------- | ------------ |
+| `-n, --name`   | Nome do relatório                      | `report`     |
+| `-p, --path`   | Diretório de saída                     | `reports/`   |
+| `-f, --format` | Formato (`html` ou `docx`)             | `html`       |
+| `-d, --date`   | Mês/ano do relatório (formato MM/YYYY) | mês anterior |
 
 ### 🔧 Build para Produção
 
