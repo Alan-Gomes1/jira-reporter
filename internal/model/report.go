@@ -43,18 +43,20 @@ func (f ReportFormat) Extension() string {
 
 // ReportOptions contém as opções para geração de relatório.
 type ReportOptions struct {
-	Name   string
-	Path   string
-	Format ReportFormat
-	Date   string // Mês/ano no formato MM/YYYY (opcional, padrão: mês anterior)
+	Name      string
+	Path      string
+	Format    ReportFormat
+	Date      string // Mês/ano no formato MM/YYYY (opcional, padrão: mês anterior)
+	IncludeQA bool   // Incluir cards onde o usuário é QA
 }
 
 // NewReportOptions cria opções com valores padrão.
 func NewReportOptions() *ReportOptions {
 	return &ReportOptions{
-		Name:   "",
-		Path:   "reports",
-		Format: FormatHTML,
-		Date:   "", // Vazio significa mês anterior
+		Name:      "",
+		Path:      "reports",
+		Format:    FormatHTML,
+		Date:      "", // Vazio significa mês anterior
+		IncludeQA: false,
 	}
 }

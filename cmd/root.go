@@ -32,6 +32,7 @@ func runReport(cmd *cobra.Command, args []string) {
 	reportPath, _ := cmd.Flags().GetString("path")
 	reportFormat, _ := cmd.Flags().GetString("format")
 	reportDate, _ := cmd.Flags().GetString("date")
+	includeQA, _ := cmd.Flags().GetBool("qa")
 
 	// Carrega as configurações
 	cfg, err := config.Load()
@@ -47,10 +48,11 @@ func runReport(cmd *cobra.Command, args []string) {
 
 	// Monta as opções do relatório
 	opts := model.ReportOptions{
-		Name:   reportName,
-		Path:   reportPath,
-		Format: model.ReportFormat(reportFormat),
-		Date:   reportDate,
+		Name:      reportName,
+		Path:      reportPath,
+		Format:    model.ReportFormat(reportFormat),
+		Date:      reportDate,
+		IncludeQA: includeQA,
 	}
 
 	// Gera o relatório
@@ -102,5 +104,9 @@ func init() {
 		"date", "d", "",
 		"Mês/ano do relatório no formato MM/YYYY (ex: 01/2025). "+
 			"Padrão: mês anterior",
+	)
+	rootCmd.Flags().BoolP(
+		"qa", "q", false,
+		"Incluir cards onde o usuário está marcado como QA",
 	)
 }

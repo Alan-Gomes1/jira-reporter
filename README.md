@@ -178,11 +178,17 @@ go build -o jira-reporter .
 # Especificar mês/ano do relatório (formato MM/YYYY)
 ./jira-reporter -d "01/2025"
 
+# Incluir cards onde o usuário está marcado como QA
+./jira-reporter -q
+
 # Gerar relatório de outubro/2024 em DOCX
 ./jira-reporter -d "10/2024" -f docx
 
+# Gerar relatório com cards de QA em DOCX
+./jira-reporter -d "10/2025" -f docx -q
+
 # Combinando opções
-./jira-reporter -n "relatorio-dezembro" -p "./relatorios" -f docx -d "12/2025"
+./jira-reporter -n "relatorio-dezembro" -p "./relatorios" -f docx -d "12/2025" -q
 ```
 
 | Flag           | Descrição                              | Padrão       |
@@ -191,6 +197,7 @@ go build -o jira-reporter .
 | `-p, --path`   | Diretório de saída                     | `reports/`   |
 | `-f, --format` | Formato (`html` ou `docx`)             | `html`       |
 | `-d, --date`   | Mês/ano do relatório (formato MM/YYYY) | mês anterior |
+| `-q, --qa`     | Incluir cards onde o usuário é QA      | `false`      |
 
 ### 🔧 Build para Produção
 

@@ -51,7 +51,7 @@ func (s *reportService) Generate(opts model.ReportOptions) error {
 	}
 
 	// Buscar dados do Jira
-	reportData, err := s.fetchReportData(opts.Date)
+	reportData, err := s.fetchReportData(opts.Date, opts.IncludeQA)
 	if err != nil {
 		return err
 	}
@@ -91,7 +91,7 @@ func (s *reportService) validateFormat(format model.ReportFormat) error {
 
 // fetchReportData busca e monta os dados do relatório.
 func (s *reportService) fetchReportData(
-	specifiedDate string,
+	specifiedDate string, includeQA bool,
 ) (*model.ReportData, error) {
 	var firstDay, lastDay time.Time
 
@@ -106,7 +106,7 @@ func (s *reportService) fetchReportData(
 		firstDay, lastDay = s.dateService.GetPreviousMonthRange()
 	}
 
-	issues, err := s.repo.FetchIssues(firstDay, lastDay)
+	issues, err := s.repo.FetchIssues(firstDay, lastDay, includeQA)
 	if err != nil {
 		return nil, fmt.Errorf("erro ao buscar dados do Jira: %w", err)
 	}

@@ -41,10 +41,11 @@ func NewJiraRepository(cfg *config.Config) (JiraRepository, error) {
 }
 
 // FetchIssues busca issues do Jira no período especificado.
+// Se includeQA for true, também busca issues onde o usuário é QA.
 func (r *jiraAPIRepository) FetchIssues(
-	startDate, endDate time.Time,
+	startDate, endDate time.Time, includeQA bool,
 ) (*model.IssueCollection, error) {
-	jql := r.buildJQL(startDate, endDate)
+	jql := r.buildJQL(startDate, endDate, includeQA)
 	fields := r.getRequiredFields()
 	expand := []string{"changelog"}
 
@@ -73,11 +74,14 @@ func (r *jiraAPIRepository) FetchIssues(
 }
 
 // buildJQL constrói a query JQL para buscar issues.
-func (r *jiraAPIRepository) buildJQL(startDate, endDate time.Time) string {
+func (r *jiraAPIRepository) buildJQL(
+	startDate, endDate time.Time, includeQA bool,
+) string {
 	firstDay := startDate.Format(jiraDateFormat)
 	lastDay := endDate.Format(jiraDateFormat)
 
-	return fmt.Sprintf(
+	// Condição base: assignee é o usuário atual
+	baseCondition := fmt.Sprintf(
 		"assignee = %s AND (%s during ('%s', '%s') OR %s >= '%s' AND %s <= '%s')",
 		"currentUser()",
 		"status changed to 'In Progress'",
@@ -85,6 +89,21 @@ func (r *jiraAPIRepository) buildJQL(startDate, endDate time.Time) string {
 		"created", firstDay,
 		"created", lastDay,
 	)
+
+	// Se includeQA for true, adiciona condição para cards onde o usuário é QA
+	if includeQA {
+		qaCondition := fmt.Sprintf(
+			"'QA[User Picker (single user)]' = %s AND (%s during ('%s', '%s') OR %s >= '%s' AND %s <= '%s')",
+			"currentUser()",
+			"status changed to 'In Progress'",
+			firstDay, lastDay,
+			"created", firstDay,
+			"created", lastDay,
+		)
+		return fmt.Sprintf("(%s) OR (%s)", baseCondition, qaCondition)
+	}
+
+	return baseCondition
 }
 
 // getRequiredFields retorna os campos necessários para a busca.

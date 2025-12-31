@@ -10,5 +10,8 @@ import (
 // JiraRepository define a interface para acesso aos dados do Jira.
 type JiraRepository interface {
 	// FetchIssues busca issues do Jira no período especificado.
-	FetchIssues(startDate, endDate time.Time) (*model.IssueCollection, error)
+	// Se includeQA for true, também busca issues onde o usuário é QA.
+	FetchIssues(startDate, endDate time.Time, includeQA bool) (
+		*model.IssueCollection, error,
+	)
 }
