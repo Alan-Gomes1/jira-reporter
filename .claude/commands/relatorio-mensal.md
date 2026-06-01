@@ -40,13 +40,13 @@ Flags disponíveis:
 - `-d "MM/YYYY"` - Mês/ano específico (padrão: mês anterior)
 - `-q` - Incluir tarefas de QA
 
-### 5. Enriquecer descrições das atividades via API do Jira
+### 5. Enriquecer descrições das atividades via API do Jira (padrão Problema / Solução)
 
-O CLI gera o relatório, mas as descrições na seção "RESUMO DAS ATIVIDADES" frequentemente ficam truncadas ou genéricas (ex: "Descrição detalhada"). Este passo corrige isso buscando as descrições completas diretamente da API do Jira.
+O CLI gera o relatório, mas as descrições na seção "RESUMO DAS ATIVIDADES" frequentemente ficam truncadas ou genéricas (ex: "Descrição detalhada"). Este passo corrige isso buscando as descrições completas na API do Jira e reescrevendo cada item como um **resumo curto no padrão Problema / Solução** — descrevendo qual era o problema e o que foi feito para corrigir.
 
-1. Leia o arquivo HTML gerado e extraia todos os IDs de issues (ex: `PSD-2788`, `PPRDJ-456`)
+1. Leia o arquivo HTML gerado e extraia todos os IDs de issues (ex: `PSD-2788`, `PPRDJ-456`), **preservando a ordem em que aparecem** na tabela de atividades
 2. Leia o `.env` para obter `EMAIL`, `API_KEY` e `URL`
-3. Faça uma chamada à API do Jira para buscar as descrições completas:
+3. Faça uma chamada à API do Jira para buscar `summary` e `description` completas:
 
 ```bash
 source .env && curl -s -u "$EMAIL:$API_KEY" \
@@ -54,23 +54,35 @@ source .env && curl -s -u "$EMAIL:$API_KEY" \
   "$URL/rest/api/3/search/jql" \
   -d '{
     "jql": "key in (ISSUE-1,ISSUE-2,...)",
-    "fields": ["key","description"],
+    "fields": ["key","summary","description"],
     "maxResults": 50
   }'
 ```
 
 **Importante**: A API antiga `/rest/api/3/search` foi descontinuada. Use `/rest/api/3/search/jql`.
 
-4. Para cada issue, extraia o texto da descrição do campo `description` (formato Atlassian Document Format - ADF):
-   - Percorra os nodes recursivamente extraindo o `text` de nodes do tipo `text`
-   - Pule cabeçalhos genéricos como "Descrição detalhada", "Necessidade", "Evidência"
-   - Pare antes de seções como "Passo a Passo", "Situação encontrada", "Evidências"
-   - Limite cada descrição a ~500 caracteres
-   - Faça escape de HTML nos textos extraídos
+4. Para cada issue, extraia o texto completo da descrição do campo `description` (formato Atlassian Document Format - ADF):
+   - Percorra os nodes recursivamente extraindo o `text` de nodes do tipo `text` (trate `hardBreak` e fim de `paragraph`/`heading`/`listItem` como quebra de linha)
+   - Use também o `summary` para entender o tema da tarefa
+   - Salve o texto extraído em um arquivo temporário se for grande, para conseguir ler tudo
 
-5. Substitua a seção "RESUMO DAS ATIVIDADES" no HTML, trocando cada `<p><b>KEY:</b> texto antigo</p>` pela descrição completa extraída da API
+5. **Sintetize um resumo curto Problema / Solução para cada issue** (NÃO copie a descrição bruta do Jira):
+   - **Problema**: 1 frase descrevendo o que estava errado / a necessidade (ex: bug, comportamento incorreto, lacuna funcional, requisito regulatório)
+   - **Solução**: 1–2 frases objetivas descrevendo o que foi feito para resolver (a implementação/correção), mencionando arquivos/componentes-chave quando relevante
+   - Escreva em português, em tom técnico e direto; cada resumo deve ter ~2 a 4 linhas no total
+   - Para cards de bug: deixe claro o sintoma observado e a causa quando conhecida
+   - Para cards de feature/épico: descreva a necessidade e a entrega; em cards-pai, sinalize "(card pai do épico)"
+   - Faça escape de HTML nos textos
 
-6. Salve o arquivo HTML atualizado
+6. Monte cada parágrafo no formato exato abaixo e substitua todo o conteúdo da seção "RESUMO DAS ATIVIDADES", mantendo a mesma ordem das issues na tabela:
+
+```html
+<p><b>KEY:</b> <b>Problema:</b> ...uma frase... <b>Solução:</b> ...uma ou duas frases...</p>
+```
+
+   Dica de implementação: gere um script Python que (a) recebe o dicionário `{KEY: (problema, solucao)}`, (b) faz `html.escape` nos textos, (c) monta os `<p>` na ordem da tabela e (d) substitui via regex o conteúdo entre o cabeçalho `<td><b>RESUMO DAS ATIVIDADES</b></td>` e o `</td></tr></table>` seguinte.
+
+7. Salve o arquivo HTML atualizado e (se o formato for DOCX) regenere/reconverta a partir do HTML enriquecido.
 
 ### 6. Verificar resultado
 
