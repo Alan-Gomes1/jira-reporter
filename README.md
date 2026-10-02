@@ -12,6 +12,7 @@ Aplicação CLI em Go para gerar relatórios mensais de prestação de serviços
 - 🔗 Integração com Jira Cloud via API
 - 📋 Template HTML personalizável
 - ⚡ CLI simples e intuitiva
+- 🤖 Slash command `/relatorio-mensal` para Claude Code, com enriquecimento das descrições via API do Jira
 
 ## 🏗️ Arquitetura
 
@@ -231,6 +232,46 @@ O arquivo `template.html` na raiz do projeto pode ser editado para personalizar 
 | `{{.Jira.Items[].Description}}` | Descrição da issue            |
 | `{{.Jira.Items[].Date}}`        | Data da issue                 |
 | `{{.Jira.Items[].URL}}`         | URL da issue no Jira          |
+
+---
+
+## 🤖 Comando `/relatorio-mensal` (Claude Code)
+
+O repositório traz um slash command para o [Claude Code](https://claude.com/claude-code), definido em `.claude/commands/relatorio-mensal.md`. Ele automatiza o fluxo completo do relatório e vai além do que a CLI faz sozinha: além de executar o binário, busca as descrições completas das issues na API do Jira e reescreve a seção **"Resumo das atividades"** no padrão **Problema / Solução**.
+
+Isso resolve a principal limitação da geração automática: o campo de descrição vindo do Jira costuma chegar truncado ou genérico no template.
+
+### Pré-requisitos
+
+- Claude Code instalado e aberto na raiz do projeto
+- Arquivo `.env` configurado (mesmas variáveis da seção de instalação)
+- Binário compilado na raiz (`go build -o jira-reporter .`) — o comando compila automaticamente se não encontrar
+
+### Uso
+
+```
+/relatorio-mensal
+```
+
+O comando pergunta o formato (HTML ou DOCX) e se deve incluir os cards em que você é QA assignee. Para pular as perguntas e usar os padrões (HTML, sem QA), basta pedir algo como "gera rápido". Para um mês específico, informe-o junto do comando:
+
+```
+/relatorio-mensal 03/2026
+```
+
+### O que o comando faz
+
+| Etapa | Descrição                                                                         |
+| ----- | --------------------------------------------------------------------------------- |
+| 1     | Verifica o binário `jira-reporter` e compila se necessário                         |
+| 2     | Determina o mês de competência (mês anterior, ou o informado via `-d`)             |
+| 3     | Executa a CLI com as flags correspondentes às respostas                            |
+| 4     | Extrai as chaves das issues do HTML gerado, preservando a ordem da tabela          |
+| 5     | Consulta `/rest/api/3/search/jql` para obter `summary` e `description` completas   |
+| 6     | Sintetiza um resumo curto Problema / Solução por issue e reescreve a seção no HTML |
+| 7     | Informa o caminho do arquivo e um resumo do período e das atividades encontradas   |
+
+> ℹ️ A API antiga `/rest/api/3/search` foi descontinuada pela Atlassian. O comando usa `/rest/api/3/search/jql`.
 
 ---
 
